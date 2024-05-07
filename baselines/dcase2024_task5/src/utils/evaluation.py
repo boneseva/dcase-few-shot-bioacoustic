@@ -17,7 +17,7 @@ from scipy import stats
 import src.utils.metrics as metrics
 
 MIN_EVAL_VALUE = 0.00001
-N_SHOTS = 5
+N_SHOTS = 1
 MIN_IOU_TH = 0.3
 PRED_FILE_HEADER = ["Audiofilename", "Starttime", "Endtime"]
 POS_VALUE = "POS"

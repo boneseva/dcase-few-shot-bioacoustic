@@ -67,9 +67,9 @@ set:
 
 path:
   # From the log directory
-  root_dir: C:/Users/Eva/Documents/VibroScape/dcase-few-shot-bioacoustic/baselines/dcase2024_task5
-  train_dir: ${path.root_dir}/Development_Set/Training_Set
-  eval_dir: ${path.root_dir}/Development_Set/Validation_Set
+  root_dir: C:/Users/Eva/Documents/VibroScape/dcase-few-shot-bioacoustic/baselines/dcase2024_task5/data/
+  train_dir: ${path.root_dir}/train
+  eval_dir: ${path.root_dir}/val
   # test_dir: ${path.root_dir}/Test_Set
   test_dir: null
   extra_train_dir: null

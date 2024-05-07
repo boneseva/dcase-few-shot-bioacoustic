@@ -186,6 +186,7 @@ class Feature_Extractor:
 
 
 def process(fpath):
+    global fe
     print(fpath)
     error_files = []
     for file in tqdm(fpath):
@@ -210,6 +211,7 @@ def calculate_feature_mean_std(A):
 
 
 def main(data_path: str):
+    global fe
     r"""Prepare features for further developement."""
     PATH = data_path
 
@@ -271,5 +273,5 @@ def main(data_path: str):
 
 if __name__ == "__main__":
     flags = parse_args()
-    data_path = os.path.join(flags.data_dir, "Development_Set")
+    data_path = os.path.join(flags.data_dir, "data")
     main(data_path)

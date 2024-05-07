@@ -53,8 +53,8 @@ def train_protonet(encoder,train_loader,valid_loader,conf,num_batches_tr,num_bat
     
     
     optim = torch.optim.Adam([{'params':encoder.parameters()}] ,lr=conf.train.lr_rate)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer=optim, gamma=conf.train.scheduler_gamma,
-                                                   step_size=conf.train.scheduler_step_size)
+    lr_scheduler = {'scheduler': torch.optim.lr_scheduler.StepLR(optimizer=optim, gamma=conf.train.scheduler_gamma,
+                                                   step_size=conf.train.scheduler_step_size)}
     num_epochs = conf.train.epochs
 
     best_model_path = conf.path.best_model

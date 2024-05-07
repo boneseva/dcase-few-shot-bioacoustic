@@ -5,8 +5,8 @@ torch.use_deterministic_algorithms(True)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True
 
-import dotenv
-import hydra
+import dotenv #python-dotenv
+import hydra #hydra-core
 from omegaconf import DictConfig
 
 # load environment variables from `.env` file if it exists
@@ -14,7 +14,7 @@ from omegaconf import DictConfig
 dotenv.load_dotenv(override=True)
 
 
-@hydra.main(config_path="configs/", config_name="train.yaml")
+@hydra.main(config_path="configs/", config_name="train_vibroscape.yaml")
 def main(config: DictConfig):
     # Imports can be nested inside @hydra.main to optimize tab completion
     # https://github.com/facebookresearch/hydra/issues/934
@@ -22,7 +22,7 @@ def main(config: DictConfig):
     from src.training_pipeline import train
 
     if config.disable_cudnn:
-        print("cudnn is disabled, the trianing may be slower")
+        print("cudnn is disabled, the training may be slower")
         torch.backends.cudnn.enabled = False
     # Applies optional utilities
     utils.extras(config)

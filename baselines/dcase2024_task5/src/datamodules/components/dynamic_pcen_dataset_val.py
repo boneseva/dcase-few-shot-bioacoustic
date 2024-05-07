@@ -300,19 +300,21 @@ class PrototypeDynamicArrayDataSetVal(Dataset):
         ]
 
     def get_glob_cls_name(self, file):
+        # split by "/" or "\\"
+        file = file.replace("\\", "/")
         split_list = file.split("/")
-        return split_list[-2]
+        return split_list[-1]
 
     def get_df_pos(self, file):
         df = pd.read_csv(file, header=0, index_col=False)
         return df[(df == "POS").any(axis=1)]
 
     def get_cls_list(self, df_pos, glob_cls_name, start_time):
-        # cls_list = [
-        #     df_pos.columns[(df_pos == "POS").loc[index]].values
-        #     for index, row in df_pos.iterrows()
-        # ]
-        # cls_list = list(chain.from_iterable(cls_list))
+        cls_list = [
+            df_pos.columns[(df_pos == "POS").loc[index]].values
+            for index, row in df_pos.iterrows()
+        ]
+        cls_list = list(chain.from_iterable(cls_list))
         if "Q" == df_pos.columns[3]:  # For HB
             cls_list = [glob_cls_name] * len(start_time)
         return cls_list
