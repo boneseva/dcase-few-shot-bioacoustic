@@ -147,15 +147,20 @@ class Feature_Extractor:
         result["waveform"], _ = librosa.load(audio_path, sr=self.sr)
         result["waveform"] = self.norm(result["waveform"])
 
-        result["spec"], result["phase"] = librosa.magphase(
-            librosa.stft(result["waveform"], hop_length=256, n_fft=1024)
-        )
-
-        result["mel"] = self.mel(result["waveform"]).astype(np.float32)
-        result["mel_un_normalized"] = result["mel"]
-        result["logmel"] = self.logmel(result["mel"]).astype(np.float32)
-        result["pcen"] = self.pcen(result["waveform"]).astype(np.float32)
-        result["mfcc"] = self.mfcc(result["logmel"]).astype(np.float32)
+        if "spec" in features_list:
+            result["spec"], result["phase"] = librosa.magphase(
+                librosa.stft(result["waveform"], hop_length=256, n_fft=1024)
+            )
+        if "mel" in features_list:
+            result["mel"] = self.mel(result["waveform"]).astype(np.float32)
+        if "mel_un_normalized" in features_list:
+            result["mel_un_normalized"] = result["mel"]
+        if "logmel" in features_list:
+            result["logmel"] = self.logmel(result["mel"]).astype(np.float32)
+        if "pcen" in features_list:
+            result["pcen"] = self.pcen(result["waveform"]).astype(np.float32)
+        if "mfcc" in features_list:
+            result["mfcc"] = self.mfcc(result["logmel"]).astype(np.float32)
         # result["rms"] = self.rms(result["spec"]).astype(np.float32)
         # result["spectral_centroid"] = self.spectral_centroid(result["spec"]).astype(np.float32)
         # result["spectral_bandwidth"] = self.spectral_bandwidth(result["spec"]).astype(np.float32)
@@ -165,9 +170,10 @@ class Feature_Extractor:
         # result["spectral_rolloff"] = self.spectral_rolloff(result["spec"]).astype(np.float32)
         # result["poly_features"] = self.poly_features(result["spec"], order=1).astype(np.float32)
         # result["zero_crossing_rate"] = self.zero_crossing_rate(result["waveform"]).astype(np.float32)
-        result["delta_mfcc"] = self.delta_mfcc(result["mfcc"], order=1, width=9).astype(
-            np.float32
-        )
+        if "delta_mfcc" in features_list:
+            result["delta_mfcc"] = self.delta_mfcc(result["mfcc"], order=1, width=9).astype(
+                np.float32
+            )
 
         # result["mel"] = result["mel"].T
         # result["mfcc"] = result["mfcc"].T
@@ -190,15 +196,18 @@ def process(fpath):
     print(fpath)
     error_files = []
     for file in tqdm(fpath):
-        try:
-            features = fe.extract_feature(file)
-            for k in features.keys():
-                npy_path = file.replace(".wav", "_%s.npy" % k)
-                np.save(npy_path, features[k])
-        except:
-            os.remove(file)
-            error_files.append(file)
-            continue
+        if not os.path.exists(file.replace(".wav", "_logmel.npy")):
+            try:
+                features = fe.extract_feature(file)
+                for k in features.keys():
+                    npy_path = file.replace(".wav", "_%s.npy" % k)
+                    np.save(npy_path, features[k])
+            except:
+                # os.remove(file)
+                error_files.append(file)
+                continue
+        else:
+            print("Features already extracted.")
     print("Encounter error in these files:", error_files)
 
 
@@ -211,24 +220,25 @@ def calculate_feature_mean_std(A):
 
 
 def main(data_path: str):
-    global fe
+    global fe, features_list
     r"""Prepare features for further developement."""
     PATH = data_path
 
-    r"""Data Preparation"""
-    print(f"Checking dataset in the local...")
-    if not os.path.exists(PATH):
-        zipfile_path = os.path.join(*PATH.split("/")[:-1], "Development_Set.zip")
-        print(f"Downloading data to {zipfile_path}")
-        os.system(f"wget https://zenodo.org/record/6482837/files/Development_Set.zip?download=1 -O {zipfile_path}")
-        os.system(f"unzip {zipfile_path}")
-    print(f"Dataset is now ready!")
+    # r"""Data Preparation"""
+    # print(f"Checking dataset in the local...")
+    # if not os.path.exists(PATH):
+    #     zipfile_path = os.path.join(*PATH.split("/")[:-1], "Development_Set.zip")
+    #     print(f"Downloading data to {zipfile_path}")
+    #     os.system(f"wget https://zenodo.org/record/6482837/files/Development_Set.zip?download=1 -O {zipfile_path}")
+    #     os.system(f"unzip {zipfile_path}")
+    # print(f"Dataset is now ready!")
     
     
     r"""Feature extraction"""
-    features = ["mel", "logmel", "pcen", "mfcc", "delta_mfcc"]
+    # features = ["mel", "logmel", "pcen", "mfcc", "delta_mfcc"]
+    features_list = ["logmel"]
     suffix = ".wav"
-    print(f"Extracting features: {features}")
+    print(f"Extracting features: {features_list}")
     # SAMPLE_RATE = 22050
     fe = Feature_Extractor()
     files = recursive_glob(PATH, suffix)
@@ -240,8 +250,8 @@ def main(data_path: str):
 
     r"""Feature normalization"""
     print("Preparing the normalized features...")
-    for k in features:
-        if "un_normalized" in features:
+    for k in features_list:
+        if "un_normalized" in features_list:
             continue
         print(k)
         array_list = []
@@ -252,7 +262,7 @@ def main(data_path: str):
             # try:
             #     npy_path = file.replace(".wav", "_%s.npy" % k)
             #     array = np.load(npy_path)
-            #     array_list.append(array)
+            #     array_list.append(array) 
             # except:
             #     print("no such file", file)
             #     continue
@@ -274,4 +284,7 @@ def main(data_path: str):
 if __name__ == "__main__":
     flags = parse_args()
     data_path = os.path.join(flags.data_dir, "data")
+    print("DATA: ", data_path)
     main(data_path)
+
+    print("FINISHED!!!")
