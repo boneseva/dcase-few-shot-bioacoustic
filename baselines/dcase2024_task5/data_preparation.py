@@ -8,7 +8,6 @@ from tqdm import tqdm
 import os
 import argparse
 
-
 EPS = 1e-8
 
 
@@ -21,12 +20,12 @@ def parse_args():
 
 def recursive_glob(path, suffix):
     return (
-        glob(os.path.join(path, "*" + suffix))
-        + glob(os.path.join(path, "*/*" + suffix))
-        + glob(os.path.join(path, "*/*/*" + suffix))
-        + glob(os.path.join(path, "*/*/*/*" + suffix))
-        + glob(os.path.join(path, "*/*/*/*/*" + suffix))
-        + glob(os.path.join(path, "*/*/*/*/*/*" + suffix))
+            glob(os.path.join(path, "*" + suffix))
+            + glob(os.path.join(path, "*/*" + suffix))
+            + glob(os.path.join(path, "*/*/*" + suffix))
+            + glob(os.path.join(path, "*/*/*/*" + suffix))
+            + glob(os.path.join(path, "*/*/*/*/*" + suffix))
+            + glob(os.path.join(path, "*/*/*/*/*/*" + suffix))
     )
 
 
@@ -49,7 +48,7 @@ class Feature_Extractor:
     def mel(self, y):
         assert np.max(y) <= 1, np.max(y)
         mel_spec = librosa.feature.melspectrogram(
-            y,
+            y=y,
             sr=self.sr,
             n_fft=self.n_fft,
             hop_length=self.hop,
@@ -68,7 +67,7 @@ class Feature_Extractor:
     def pcen(self, y):
         assert np.max(y) <= 1
         mel_spec = librosa.feature.melspectrogram(
-            y * (2**32),
+            y=y * (2 ** 32),
             sr=self.sr,
             n_fft=self.n_fft,
             hop_length=self.hop,
@@ -151,7 +150,7 @@ class Feature_Extractor:
             result["spec"], result["phase"] = librosa.magphase(
                 librosa.stft(result["waveform"], hop_length=256, n_fft=1024)
             )
-        if "mel" in features_list:
+        if "logmel" in features_list:
             result["mel"] = self.mel(result["waveform"]).astype(np.float32)
         if "mel_un_normalized" in features_list:
             result["mel_un_normalized"] = result["mel"]
@@ -181,7 +180,7 @@ class Feature_Extractor:
         # del result['mel'] # TODO
 
         # del result['spec']
-        del result["phase"]
+        # del result["phase"]
         del result["waveform"]
 
         for k in result.keys():
@@ -196,18 +195,18 @@ def process(fpath):
     print(fpath)
     error_files = []
     for file in tqdm(fpath):
-        if not os.path.exists(file.replace(".wav", "_logmel.npy")):
-            try:
-                features = fe.extract_feature(file)
-                for k in features.keys():
-                    npy_path = file.replace(".wav", "_%s.npy" % k)
-                    np.save(npy_path, features[k])
-            except:
-                # os.remove(file)
-                error_files.append(file)
-                continue
-        else:
-            print("Features already extracted.")
+        # if not os.path.exists(file.replace(".wav", "_logmel.npy")):
+        try:
+            features = fe.extract_feature(file)
+            for k in features.keys():
+                npy_path = file.replace(".wav", "_%s.npy" % k)
+                np.save(npy_path, features[k])
+        except:
+            # os.remove(file)
+            error_files.append(file)
+            continue
+        # else:
+        #     print("Features already extracted.")
     print("Encounter error in these files:", error_files)
 
 
@@ -232,11 +231,10 @@ def main(data_path: str):
     #     os.system(f"wget https://zenodo.org/record/6482837/files/Development_Set.zip?download=1 -O {zipfile_path}")
     #     os.system(f"unzip {zipfile_path}")
     # print(f"Dataset is now ready!")
-    
-    
+
     r"""Feature extraction"""
     # features = ["mel", "logmel", "pcen", "mfcc", "delta_mfcc"]
-    features_list = ["logmel"]
+    features_list = ["mel", "logmel", "pcen", "mfcc", "delta_mfcc"]
     suffix = ".wav"
     print(f"Extracting features: {features_list}")
     # SAMPLE_RATE = 22050
@@ -246,7 +244,6 @@ def main(data_path: str):
     process(files)
 
     files = recursive_glob(PATH, ".wav")
-
 
     r"""Feature normalization"""
     print("Preparing the normalized features...")
@@ -284,6 +281,7 @@ def main(data_path: str):
 if __name__ == "__main__":
     flags = parse_args()
     data_path = os.path.join(flags.data_dir, "data")
+    data_path = os.path.join(flags.data_dir, "data_testing")
     print("DATA: ", data_path)
     main(data_path)
 

@@ -34,7 +34,7 @@ defaults:
 original_work_dir: ${hydra:runtime.cwd}
 
 # path to folder with data
-data_dir: ${original_work_dir}/data/
+data_dir: ${original_work_dir}/data_testing/
 
 # pretty print config at the start of the run using Rich library
 print_config: True
@@ -67,9 +67,9 @@ set:
 
 path:
   # From the log directory
-  root_dir: /ibex/user/bonese/dcase/baselines/dcase2024_task5/data/
+  root_dir: C:\Users\Eva\Documents\VibroScape\dcase-few-shot-bioacoustic\baselines\dcase2024_task5\data_testing
   train_dir: ${path.root_dir}/train
-  eval_dir: ${path.root_dir}/val
+  eval_dir: ${path.root_dir}/test
   # test_dir: ${path.root_dir}/Test_Set
   test_dir: null
   extra_train_dir: null
@@ -106,7 +106,7 @@ train_param:
   scheduler_step_size: 10
   num_episodes: 2000
   adaptive_seg_len: true
-  use_validation_first_5: false  # NOTE: DON'T ENABLE TRANSDUCTIVE LEARNING IN THE CHALLENGE
+  use_validation_first_5: true  # NOTE: DON'T ENABLE TRANSDUCTIVE LEARNING IN THE CHALLENGE
   negative_train_contrast: true
   load_weight_from: null
   negative_seg_search: false
@@ -122,4 +122,5 @@ eval_param:
   query_batch_size: 8
   negative_set_batch_size: 16
   threshold: 0.9
+
   negative_estimate: freq_mask
